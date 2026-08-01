@@ -44,7 +44,7 @@ class Api::V1::Accounts::Conversations::SupportIncomingMessagesController < Api:
 
     content = request_payload['content']
     event_reference = request_payload['gabi_event_ref']
-    content.is_a?(String) && content.strip.length.between?(1, 8000) &&
+    content.is_a?(String) && content.length <= 8000 && content.strip.length >= 1 &&
       event_reference.is_a?(String) && event_reference.match?(EVENT_REFERENCE_PATTERN)
   end
 

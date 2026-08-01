@@ -126,6 +126,7 @@ RSpec.describe 'Support Incoming Messages API', type: :request do
     invalid_payloads = [
       valid_params.merge(content: ''),
       valid_params.merge(content: 'x' * 8001),
+      valid_params.merge(content: "#{' ' * 8000}x"),
       valid_params.merge(gabi_event_ref: 'not-a-real-reference'),
       valid_params.merge(private: true)
     ]

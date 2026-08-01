@@ -4,7 +4,7 @@ RSpec.describe 'Support Incoming Messages API', type: :request do
   include ActiveJob::TestHelper
 
   let!(:account) { create(:account) }
-  let!(:agent) { create(:user, account: account, role: :agent) }
+  let!(:agent) { create(:user, account: account, role: :administrator) }
   let!(:email_channel) { create(:channel_email, account: account) }
   let!(:email_inbox) { email_channel.inbox }
   let!(:conversation) do
@@ -33,6 +33,16 @@ RSpec.describe 'Support Incoming Messages API', type: :request do
     post request_path, params: valid_params, as: :json
 
     expect(response).to have_http_status(:unauthorized)
+    expect(conversation.messages).to be_empty
+  end
+
+  it 'rejects a regular inbox member even when the support attributes match' do
+    regular_agent = create(:user, account: account, role: :agent)
+    create(:inbox_member, inbox: email_inbox, user: regular_agent)
+
+    post request_path, params: valid_params, headers: regular_agent.create_new_auth_token, as: :json
+
+    expect(response).to have_http_status(:forbidden)
     expect(conversation.messages).to be_empty
   end
 

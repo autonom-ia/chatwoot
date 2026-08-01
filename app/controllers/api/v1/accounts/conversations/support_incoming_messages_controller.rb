@@ -5,7 +5,7 @@ class Api::V1::Accounts::Conversations::SupportIncomingMessagesController < Api:
   EVENT_REFERENCE_PATTERN = /\A[A-Za-z0-9_-]{43}\z/
 
   def create
-    return render_forbidden unless support_conversation?
+    return render_forbidden unless allowed_support_request?
     return render_unprocessable('Support incoming messages require an Email inbox') unless email_inbox?
     return render_unprocessable('Invalid support incoming message') unless valid_payload?
 
@@ -24,6 +24,10 @@ class Api::V1::Accounts::Conversations::SupportIncomingMessagesController < Api:
   end
 
   private
+
+  def allowed_support_request?
+    Current.account_user&.administrator? && support_conversation?
+  end
 
   def support_conversation?
     attributes = @conversation.custom_attributes.to_h

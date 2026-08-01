@@ -125,6 +125,7 @@ RSpec.describe 'Support Incoming Messages API', type: :request do
     headers = agent.create_new_auth_token
     invalid_payloads = [
       valid_params.merge(content: ''),
+      valid_params.merge(content: "\u00A0\u2003"),
       valid_params.merge(content: 'x' * 8001),
       valid_params.merge(content: "#{' ' * 8000}x"),
       valid_params.merge(gabi_event_ref: 'not-a-real-reference'),

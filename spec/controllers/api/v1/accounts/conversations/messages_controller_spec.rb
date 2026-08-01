@@ -36,6 +36,23 @@ RSpec.describe 'Conversation Messages API', type: :request do
         expect(conversation.messages.first.content).to eq(params[:content])
       end
 
+      it 'rejects incoming messages in an email inbox' do
+        email_channel = create(:channel_email, account: account)
+        email_conversation = create(:conversation, account: account, inbox: email_channel.inbox)
+        create(:inbox_member, inbox: email_channel.inbox, user: agent)
+
+        post api_v1_account_conversation_messages_url(
+          account_id: account.id,
+          conversation_id: email_conversation.display_id
+        ), params: { content: 'Portal message', message_type: 'incoming' },
+           headers: agent.create_new_auth_token,
+           as: :json
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response.parsed_body['error']).to eq('Incoming messages are only allowed in Api inboxes')
+        expect(email_conversation.messages).to be_empty
+      end
+
       it 'does not create the message' do
         params = { content: "#{'h' * 150 * 1000}a", private: true }
 

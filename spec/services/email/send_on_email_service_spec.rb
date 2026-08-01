@@ -83,4 +83,21 @@ describe Email::SendOnEmailService do
       end
     end
   end
+
+  describe '#in_reply_to' do
+    it 'skips portal messages and preserves the latest real email message id' do
+      create(:message,
+             conversation: conversation,
+             account: account,
+             message_type: 'incoming',
+             content_attributes: { 'email' => { 'message_id' => 'incoming-123@example.com' } })
+      create(:message,
+             conversation: conversation,
+             account: account,
+             message_type: 'incoming',
+             content_attributes: { 'gabi_event_ref' => 'portal-event' })
+
+      expect(service.send(:in_reply_to)).to eq('<incoming-123@example.com>')
+    end
+  end
 end

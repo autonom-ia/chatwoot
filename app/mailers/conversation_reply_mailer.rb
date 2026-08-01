@@ -157,14 +157,8 @@ class ConversationReplyMailer < ApplicationMailer
   end
 
   def conversation_reply_email_id
-    # Find the last incoming message's message_id to reply to
-    content_attributes = @conversation.messages.incoming.last&.content_attributes
-
-    if content_attributes && content_attributes['email'] && content_attributes['email']['message_id']
-      return "<#{content_attributes['email']['message_id']}>"
-    end
-
-    nil
+    message_id = latest_incoming_email_message_id(@conversation)
+    message_id.present? ? "<#{message_id}>" : nil
   end
 
   def references_header

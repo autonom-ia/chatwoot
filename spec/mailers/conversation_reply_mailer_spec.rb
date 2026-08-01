@@ -194,6 +194,32 @@ RSpec.describe ConversationReplyMailer do
         end
       end
 
+      context 'when a portal message follows an incoming email' do
+        let(:mail) { described_class.email_reply(reply_message).deliver_now }
+        let(:reply_message) do
+          create(:message, conversation: conversation, account: account, message_type: 'outgoing', content: 'Reply')
+        end
+
+        before do
+          create(:message,
+                 conversation: conversation,
+                 account: account,
+                 message_type: 'incoming',
+                 content_attributes: { 'email' => { 'message_id' => 'incoming-123@example.com' } })
+          create(:message,
+                 conversation: conversation,
+                 account: account,
+                 message_type: 'incoming',
+                 content: 'Portal message',
+                 content_attributes: { 'gabi_event_ref' => 'portal-event' })
+        end
+
+        it 'preserves the prior email thread' do
+          expect(mail.in_reply_to).to eq('incoming-123@example.com')
+          expect(mail.references).to eq('incoming-123@example.com')
+        end
+      end
+
       context 'when replying to a message that has references' do
         let(:incoming_message_with_refs) do
           create(:message,

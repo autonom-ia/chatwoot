@@ -3,6 +3,14 @@
 # This module provides functionality to construct proper References headers
 # that maintain email conversation threading according to RFC 5322 standards.
 module ReferencesHeaderBuilder
+  def latest_incoming_email_message_id(conversation)
+    email_message_id = "(content_attributes #>> '{}')::json -> 'email' ->> 'message_id'"
+    conversation.messages.incoming
+                .where("NULLIF(#{email_message_id}, '') IS NOT NULL")
+                .reorder(created_at: :desc, id: :desc)
+                .pick(Arel.sql(email_message_id))
+  end
+
   # Builds a complete References header for an email reply
   #
   # According to RFC 5322, the References header should contain:

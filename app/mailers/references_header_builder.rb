@@ -3,6 +3,14 @@
 # This module provides functionality to construct proper References headers
 # that maintain email conversation threading according to RFC 5322 standards.
 module ReferencesHeaderBuilder
+  def latest_incoming_email_message_id(conversation)
+    incoming_message = conversation.messages.incoming.reorder(created_at: :desc, id: :desc).find do |candidate|
+      candidate.content_attributes&.dig('email', 'message_id').present?
+    end
+
+    incoming_message&.content_attributes&.dig('email', 'message_id')
+  end
+
   # Builds a complete References header for an email reply
   #
   # According to RFC 5322, the References header should contain:

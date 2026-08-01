@@ -88,9 +88,7 @@ class Email::SendOnEmailService < Base::SendOnChannelService
   end
 
   def in_reply_to
-    incoming_message = conversation.messages.incoming.last
-    content_attrs = incoming_message&.content_attributes
-    message_id = content_attrs&.dig('email', 'message_id')
+    message_id = latest_incoming_email_message_id(conversation)
     message_id.present? ? "<#{message_id}>" : nil
   end
 
